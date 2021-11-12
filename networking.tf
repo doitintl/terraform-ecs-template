@@ -43,6 +43,15 @@ resource "aws_route_table" "public" {
   }
 }
 
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.aws-vpc.id
+
+  tags = {
+    Name        = "${var.app_name}-routing-table-private"
+    Environment = var.app_environment
+  }
+}
+
 resource "aws_route" "public" {
   route_table_id         = aws_route_table.public.id
   destination_cidr_block = "0.0.0.0/0"
@@ -53,4 +62,52 @@ resource "aws_route_table_association" "public" {
   count          = length(var.public_subnets)
   subnet_id      = element(aws_subnet.public.*.id, count.index)
   route_table_id = aws_route_table.public.id
+}
+
+resource "aws_route_table_association" "private" {
+  count          = length(var.private_subnets)
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  route_table_id = aws_route_table.private.id
+}
+
+
+resource "aws_security_group" "vpce" {
+  name        = "default-vpce-sg"
+  description = "Security group to control VPC Endpoints inbound/outbound rules"
+  vpc_id      = aws_vpc.aws-vpc.id
+
+  ingress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    #security_groups = [aws_security_group.ecs_service.id]
+  }
+
+  tags = {
+    Name = "vpce-sg"
+  }
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id            = aws_vpc.aws-vpc.id
+  service_name      = "com.amazonaws.${var.aws_region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids    = aws_route_table.private.*.id
+}
+
+resource "aws_vpc_endpoint" "dkr" {
+  vpc_id              = aws_vpc.aws-vpc.id
+  private_dns_enabled = true
+  service_name        = "com.amazonaws.${var.aws_region}.ecr.dkr"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.private.*.id
+  security_group_ids  = [aws_security_group.vpce.id]
+}
+
+resource "aws_vpc_endpoint" "ecr" {
+  vpc_id              = aws_vpc.aws-vpc.id
+  private_dns_enabled = true
+  service_name        = "com.amazonaws.${var.aws_region}.ecr.api"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_security_group.vpce.id]
 }
