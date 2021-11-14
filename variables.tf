@@ -1,5 +1,6 @@
 # variables.tf | Auth and Application variables
 
+# No need to set if run locally AWS Keypair (Will take from ~/.aws/profile)
 variable "aws_key_pair_name" {
   type        = string
   description = "AWS Key Pair Name"

@@ -76,7 +76,7 @@ resource "aws_security_group" "vpce" {
   description = "Security group to control VPC Endpoints inbound/outbound rules"
   vpc_id      = aws_vpc.aws-vpc.id
 
-  ingress {
+  egress {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
@@ -109,5 +109,6 @@ resource "aws_vpc_endpoint" "ecr" {
   private_dns_enabled = true
   service_name        = "com.amazonaws.${var.aws_region}.ecr.api"
   vpc_endpoint_type   = "Interface"
+  subnet_ids          = aws_subnet.private.*.id
   security_group_ids  = [aws_security_group.vpce.id]
 }
