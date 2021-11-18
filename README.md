@@ -2,7 +2,7 @@
 
 Using this template will create the following resources:
 
-- VPC and Networking (Subnets, Internet Groups...)
+- VPC and Networking (Subnets, Routes, Security Groups, VPC Endpoints...)
 - Elastic Container Registry
 - Elastic Container Service
 - Application Load Balancer
@@ -18,7 +18,7 @@ With this initial configuration, just run `terraform init`
 
 ### Usage
 
-The values for each variable are defined in a file called `terraform.tfvars``.
+The values for each variable are defined in a file called `terraform.tfvars`.
 After you edit the vars file you should run the following:
 
 ```
