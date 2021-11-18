@@ -80,11 +80,20 @@ resource "aws_security_group" "vpce" {
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
-    #security_groups = [aws_security_group.ecs_service.id]
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  ingress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 
   tags = {
-    Name = "vpce-sg"
+    Name = "${var.app_name}-vpce-sg-n"
   }
 }
 
